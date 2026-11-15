@@ -1,0 +1,24 @@
+{
+  "name": "lacrade-agent-games",
+  "version": "1.0.0",
+  "description": "lacrade's agent for zkVerify Agent Games — Proof Gatekeeper + Steal the VFY",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.mjs",
+    "selftest": "node test/selftest.mjs",
+    "commitment": "node scripts/commitment.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "circomlibjs": "^0.1.7",
+    "js-sha3": "^0.9.3",
+    "snarkjs": "^0.7.6"
+  }
+}
