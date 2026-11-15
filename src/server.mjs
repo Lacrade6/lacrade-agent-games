@@ -62,8 +62,12 @@ async function initStrategy() {
   if (strategySaltHex) {
     strategyCommitment = await computeCommitment(strategyParams, strategySaltHex);
     strategyReady = true;
-    if (envCommitment && envCommitment !== strategyCommitment) {
-      log("error", "STRATEGY_COMMITMENT_HASH does not match params+salt — re-register the computed hash in the dashboard", {});
+    if (envCommitment) {
+      let envMatches = false;
+      try { envMatches = BigInt(envCommitment) === BigInt(strategyCommitment); } catch { envMatches = false; }
+      if (!envMatches) {
+        log("error", "STRATEGY_COMMITMENT_HASH does not match params+salt — re-register the computed hash in the dashboard", {});
+      }
     }
     log("info", "strategy ready", { commitment: strategyCommitment });
   } else if (envCommitment) {
@@ -187,9 +191,15 @@ async function handleSteal(envelope) {
     stealNonces.set(envelope.nonce, key);
   }
   // Commitment must match the registered one, else HOLD without proof.
+  // The dashboard/envelope carry the hash as 0x-hex; computeCommitment
+  // returns a decimal string — compare by field value, not by string.
   const envCommitment = envelope.strategyCommitment?.hash;
-  if (!strategyCommitment || !envCommitment
-      || String(envCommitment).toLowerCase() !== String(strategyCommitment).toLowerCase()) {
+  let commitmentMatches = false;
+  try {
+    commitmentMatches = !!strategyCommitment && !!envCommitment
+      && BigInt(envCommitment) === BigInt(strategyCommitment);
+  } catch { commitmentMatches = false; }
+  if (!commitmentMatches) {
     return failHold("strategy commitment mismatch or not configured");
   }
   if (!strategyReady) {

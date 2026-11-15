@@ -24,12 +24,15 @@ if (generate || !saltHex) {
 const params = loadStrategyParams();
 validateStrategyParams(params);
 const commitment = await computeCommitment(params, saltHex);
+const commitmentHex = "0x" + BigInt(commitment).toString(16).padStart(64, "0");
 
 console.log("Strategy params (defaults are the published reference defaults):");
 console.log(`  [extractAmount, fortifyThreshold, minOpponentBalance, mode, 0,0,0,0] = [${params.join(", ")}]`);
 console.log("  (override with STRATEGY_PARAMS env var — JSON array of 8 numbers)");
 console.log("\nCommitment hash — paste this into the dashboard (Steal the VFY section):");
-console.log(`  ${commitment}`);
+console.log(`  decimal: ${commitment}`);
+console.log(`  0x-hex (the dashboard requires a 0x-prefixed 64-hex-char hash — use this one):`);
+console.log(`  ${commitmentHex}`);
 console.log("\nPolicy: FORTIFY while own balance < fortifyThreshold; HOLD while opponent");
 console.log("balance <= minOpponentBalance; otherwise EXTRACT extractAmount. Mode 1 = always HOLD.");
 process.exit(0);

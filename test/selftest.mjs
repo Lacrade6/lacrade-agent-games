@@ -76,6 +76,7 @@ async function main() {
   const gkVk = await exportVk("gatekeeper");
   const vfyVk = await exportVk("vfyPolicy");
   const commitment = await computeCommitment(DEFAULT_STRATEGY_PARAMS, TEST_SALT);
+  const commitmentHex = "0x" + BigInt(commitment).toString(16).padStart(64, "0");
 
   // ---- 1. preflight ----
   console.log("\n[preflight]");
@@ -167,9 +168,9 @@ async function main() {
     nonce: `nonce-${turn}`,
   });
 
-  async function stealCase(name, turn, selfBalance, opponentBalance, wantAction, wantAmount) {
+  async function stealCase(name, turn, selfBalance, opponentBalance, wantAction, wantAmount, commit) {
     const t0 = Date.now();
-    const r = await post("/", stealEnv(turn, selfBalance, opponentBalance));
+    const r = await post("/", stealEnv(turn, selfBalance, opponentBalance, commit));
     const ms = Date.now() - t0;
     const actionOk = r.status === 200 && r.json?.action?.type === wantAction
       && (wantAmount === undefined ? !("amount" in (r.json?.action || {})) : r.json?.action?.amount === wantAmount);
@@ -197,6 +198,9 @@ async function main() {
   const extract = await stealCase("EXTRACT (95 vs 105)", 3, "95", "105", "EXTRACT", 5);
   await stealCase("FORTIFY (40 vs 105)", 4, "40", "105", "FORTIFY", undefined);
   await stealCase("HOLD (95 vs 0)", 5, "95", "0", "HOLD", undefined);
+
+  // 0x-hex form of the correct commitment (dashboard/envelope format) → must still prove
+  await stealCase("0x-hex commitment (95 vs 105)", 7, "95", "105", "EXTRACT", 5, commitmentHex);
 
   // wrong commitment → HOLD without proof
   const wrong = await post("/", stealEnv(6, "95", "105", "0x1234"));

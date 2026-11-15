@@ -68,6 +68,8 @@ node scripts/download-circuits.mjs ./circuits
 node scripts/commitment.mjs --generate-salt
 #    → paste the commitment hash into the dashboard (My Agents → Edit agent
 #      → Steal the VFY section) BEFORE the next Swiss round pairs.
+#      Use the 0x-hex form printed by the script — the dashboard requires a
+#      0x-prefixed 64-hex-char hash (the decimal form is rejected).
 
 # 2. run the server (dev mode: no HMAC secret yet)
 STRATEGY_SALT=<the salt> npm start
@@ -136,7 +138,7 @@ Kurier's `register-vk` response when a Kurier key is configured.)
 unsigned/bad-signature rejection (401), all 6 Gatekeeper traps + 3 boundary
 cases, Gatekeeper idempotency (identical retry response), Steal EXTRACT /
 FORTIFY / HOLD with proofs verified locally, `publicInputsHash` recomputation
-match, wrong-commitment HOLD, Steal replay. Every proof is verified locally
+match, wrong-commitment HOLD, 0x-hex commitment accepted, Steal replay. Every proof is verified locally
 with `snarkjs.groth16.verify` before the check passes.
 
 Proof times on this VM: Gatekeeper ~1.3–2.1 s (first ~5.9 s incl. wasm
